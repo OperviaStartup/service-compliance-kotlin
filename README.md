@@ -1,4 +1,4 @@
-# Service Compliance — Android (Kotlin)
+# Service Compliance | Android (Kotlin)
 
 Aplicación Android nativa de **Service Compliance** dirigida al trabajo de campo. Su objetivo es que el operario pueda autenticarse, consultar las obligaciones que tiene asignadas, registrar su ejecución y adjuntar evidencias desde el dispositivo móvil.
 
@@ -69,7 +69,7 @@ El endpoint de registro actual crea únicamente usuarios con el rol `OPERATOR`; 
 
 ## Contratos identificados en el backend
 
-Esta es la fuente de verdad para la primera integración Android: [ServiceComplianceAPI]([https://github.com/OperviaStartup/serviceComplianceAPI/tree/a70a67b2feb955bc586632be0d1d3966e36891cf](https://github.com/OperviaStartup/serviceComplianceAPI/tree/main)). Las rutas, cuerpos y códigos exitosos de la tabla se verificaron contra los controladores del último commit. Los endpoints protegidos requieren `Authorization: Bearer <JWT>`.
+Esta es la fuente de verdad para la primera integración Android: [ServiceComplianceAPI](https://github.com/OperviaStartup/serviceComplianceAPI/tree/main). Las rutas, cuerpos y códigos exitosos de la tabla se verificaron contra los controladores del último commit. Los endpoints protegidos requieren `Authorization: Bearer <JWT>`.
 
 | Método y ruta                           | Acceso                                                 | Solicitud que debe implementar la app                                                           | Respuesta exitosa actual                                                           |
 |:----------------------------------------|:-------------------------------------------------------|:------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------|
