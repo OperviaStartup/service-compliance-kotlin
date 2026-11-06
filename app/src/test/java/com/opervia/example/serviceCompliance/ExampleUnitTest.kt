@@ -1,4 +1,4 @@
-package com.upc.example.serviceComplianceKotlin
+package com.opervia.example.serviceCompliance
 
 import org.junit.Test
 
