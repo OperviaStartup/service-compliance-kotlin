@@ -1,4 +1,4 @@
-package com.upc.example.serviceComplianceKotlin.screens
+package com.opervia.example.serviceCompliance.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

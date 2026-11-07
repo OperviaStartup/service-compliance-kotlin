@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.upc.example.serviceComplianceKotlin"
+    namespace = "com.opervia.example.serviceCompliance"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.upc.example.serviceComplianceKotlin"
+        applicationId = "com.opervia.example.serviceCompliance"
         minSdk = 30
         targetSdk = 37
         versionCode = 1
@@ -51,6 +51,7 @@ dependencies {
     testImplementation(libs.junit)
     // JSONObject real para probar el contrato HTTP en la JVM, sin depender del emulador.
     testImplementation(libs.json)
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
