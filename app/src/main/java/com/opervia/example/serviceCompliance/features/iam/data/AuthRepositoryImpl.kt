@@ -8,6 +8,9 @@ import com.opervia.example.serviceCompliance.features.iam.data.remote.CurrentUse
 import com.opervia.example.serviceCompliance.features.iam.data.remote.LoginResponseDto
 import com.opervia.example.serviceCompliance.features.iam.data.remote.RefreshRequestDto
 import com.opervia.example.serviceCompliance.features.iam.domain.AuthRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
 class AuthRepositoryImpl(
@@ -18,24 +21,28 @@ class AuthRepositoryImpl(
     override suspend fun login(identifier: String, password: String): UserSession {
         val response = api.login(LoginRequestDto(identifier.trim(), password))
         val provisional = response.toSession()
-        sessionStore.save(provisional)
+        saveSession(provisional)
         val current = try {
             api.me()
-        } catch (error: Exception) {
-            sessionStore.clear()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: HttpException) {
+            if (error.code() == 401 || error.code() == 403) clearSession()
             throw error
         }
-            return provisional.copy(
+        val authenticated = provisional.copy(
                 userId = current.id,
                 fullName = current.fullName,
                 email = current.email,
                 documentNumber = current.documentNumber,
                 role = current.role
-            ).also(sessionStore::save)
+        )
+        saveSession(authenticated)
+        return authenticated
     }
 
     override suspend fun validateSession(): UserSession? {
-        val saved = sessionStore.read() ?: return null
+        val saved = readSession() ?: return null
         return try {
             applyCurrentUser(saved, api.me())
         } catch (error: HttpException) {
@@ -44,11 +51,11 @@ class AuthRepositoryImpl(
             try {
                 val refreshed = api.refresh(RefreshRequestDto(saved.refreshToken))
                 val refreshedSession = refreshed.toSession()
-                sessionStore.save(refreshedSession)
+                saveSession(refreshedSession)
                 applyCurrentUser(refreshedSession, api.me())
             } catch (refreshError: HttpException) {
                 if (refreshError.code() == 401) {
-                    sessionStore.clear()
+                    clearSession()
                     null
                 } else {
                     throw refreshError
@@ -58,25 +65,27 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() {
-        val saved = sessionStore.read()
+        val saved = readSession()
         try {
             if (saved != null) api.logout(RefreshRequestDto(saved.refreshToken))
         } finally {
-            sessionStore.clear()
+            clearSession()
         }
     }
 
-    private fun applyCurrentUser(
+    private suspend fun applyCurrentUser(
         session: UserSession,
         current: CurrentUserResponse
     ): UserSession {
-        return session.copy(
+        val updated = session.copy(
             userId = current.id,
             fullName = current.fullName,
             email = current.email,
             documentNumber = current.documentNumber,
             role = current.role
-        ).also(sessionStore::save)
+        )
+        saveSession(updated)
+        return updated
     }
 
     private fun LoginResponseDto.toSession() = UserSession(
@@ -88,4 +97,14 @@ class AuthRepositoryImpl(
         documentNumber = documentNumber,
         role = role
     )
+
+    private suspend fun saveSession(session: UserSession) {
+        withContext(Dispatchers.IO) { sessionStore.save(session) }
+    }
+
+    private suspend fun readSession(): UserSession? = withContext(Dispatchers.IO) { sessionStore.read() }
+
+    private suspend fun clearSession() {
+        withContext(Dispatchers.IO) { sessionStore.clear() }
+    }
 }

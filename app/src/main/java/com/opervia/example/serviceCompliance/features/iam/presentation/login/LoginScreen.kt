@@ -48,7 +48,9 @@ fun LoginScreen(
 
         Column(
             modifier = Modifier
+                .widthIn(max = 520.dp)
                 .fillMaxSize()
+                .align(Alignment.Center)
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
