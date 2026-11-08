@@ -7,6 +7,7 @@ import com.opervia.example.serviceCompliance.core.session.UserSession
 import com.opervia.example.serviceCompliance.features.iam.domain.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -62,7 +63,9 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
                 val session = repository.login(identifier, current.password)
                 _state.value = LoginUiState()
                 onSuccess(session)
-            } catch (error: Throwable) {
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
                 val message = when {
                     error is HttpException && error.code() == 401 ->
                         "No pudimos validar tus credenciales."
