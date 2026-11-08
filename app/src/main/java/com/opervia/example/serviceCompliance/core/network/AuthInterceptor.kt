@@ -7,7 +7,7 @@ import okhttp3.Response
 class AuthInterceptor(private val sessionStore: SessionStore) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        val path = request.url().encodedPath()
+        val path = request.url.encodedPath
         val isPublicAuthCall = path.endsWith("/auth/login") || path.endsWith("/auth/refresh")
         val token = if (isPublicAuthCall) null else sessionStore.read()?.accessToken
         val authenticated = request.newBuilder().apply {
