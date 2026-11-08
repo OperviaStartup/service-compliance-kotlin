@@ -1,4 +1,4 @@
-package com.upc.example.serviceComplianceKotlin.ui.theme
+package com.opervia.example.serviceCompliance.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

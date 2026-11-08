@@ -1,4 +1,4 @@
-package com.upc.example.serviceComplianceKotlin
+package com.opervia.example.serviceCompliance
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.upc.example.serviceComplianceKotlin", appContext.packageName)
+        assertEquals("com.opervia.example.serviceCompliance", appContext.packageName)
     }
 }
