@@ -1,14 +1,19 @@
 package com.opervia.example.serviceCompliance.features.operations.presentation.screens
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,6 +39,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -56,9 +62,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.opervia.example.serviceCompliance.R
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldCard
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldIcon
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.IconTile
@@ -158,7 +167,10 @@ internal fun FieldTasksContent(
                     Modifier.fillMaxSize().padding(padding).padding(horizontal = 18.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    if (section in setOf(AppSection.HOME, AppSection.WORK, AppSection.PROFILE)) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    if (section in setOf(AppSection.HOME, AppSection.WORK, AppSection.PROFILE)) Row(
+                        Modifier.fillMaxWidth().padding(top = if (section == AppSection.WORK) 24.dp else 0.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Column(Modifier.weight(1f)) {
                             Text(LocalDate.now(ZoneId.of("America/Lima")).format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.forLanguageTag("es-PE"))).uppercase(),
                                 style = MaterialTheme.typography.labelSmall, color = FieldMuted)
@@ -275,18 +287,36 @@ internal fun FieldTasksContent(
 
 @Composable
 private fun SavedTasksNotice(onRetry: (() -> Unit)?) {
-    Surface(color = FieldPaleBlue, shape = MaterialTheme.shapes.medium) {
+    Surface(
+        color = Color(0xFFE3EEFF),
+        shape = MaterialTheme.shapes.medium,
+        shadowElevation = 2.dp
+    ) {
         Row(
-            Modifier.fillMaxWidth().padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Modifier.fillMaxWidth().padding(14.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Icon(Icons.Outlined.CloudOff, contentDescription = null, tint = FieldBlue)
-            Column(Modifier.weight(1f)) {
-                Text("Lista guardada", style = MaterialTheme.typography.titleSmall)
-                Text("Se muestra la última actualización disponible.", style = MaterialTheme.typography.bodySmall, color = FieldMuted)
+            Surface(color = Color(0xFFD3E4FC), shape = CircleShape) {
+                Icon(
+                    Icons.Outlined.CloudOff, contentDescription = null, tint = FieldBlue,
+                    modifier = Modifier.padding(8.dp).size(20.dp)
+                )
             }
-            onRetry?.let { TextButton(onClick = it) { Text("Reintentar") } }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Lista guardada", style = MaterialTheme.typography.titleMedium)
+                StatusPill("Vista local")
+                Text(
+                    "Mostrando la última lista guardada en este dispositivo.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = FieldMuted
+                )
+            }
+            onRetry?.let {
+                TextButton(onClick = it, modifier = Modifier.align(Alignment.CenterVertically)) {
+                    Text("Reintentar")
+                }
+            }
         }
     }
 }
@@ -299,20 +329,50 @@ private fun ObligationCard(obligation: AssignedObligation, onClick: () -> Unit) 
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                IconTile(FieldSymbol.Steps)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    StatusPill(statusLabel(obligation.status), positive = obligation.status in completedStatuses, warning = obligation.status == "OVERDUE")
-                    Text(obligation.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text(obligation.siteName, style = MaterialTheme.typography.bodySmall, color = FieldMuted)
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ActivityTrack(Modifier.fillMaxHeight().width(12.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    StatusPill(
+                        statusLabel(obligation.status),
+                        positive = obligation.status in completedStatuses,
+                        warning = obligation.status == "OVERDUE"
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Image(
+                            painterResource(R.drawable.field_ic_cleaning),
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(obligation.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                FieldIcon(FieldSymbol.Building, Modifier.size(16.dp), tint = FieldMuted)
+                                Text(obligation.siteName, style = MaterialTheme.typography.bodySmall, color = FieldMuted)
+                            }
+                        }
+                    }
+                    if (obligation.dueAt.isNotBlank()) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            FieldIcon(FieldSymbol.Clock, Modifier.size(20.dp))
+                            Text(
+                                "Fecha límite · ${dateLabel(obligation.dueAt)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = FieldMuted
+                            )
+                        }
+                    }
                 }
-            }
-            if (obligation.description?.isNotBlank() == true) Text(obligation.description, style = MaterialTheme.typography.bodySmall, color = FieldMuted, maxLines = 2)
-            if (obligation.dueAt.isNotBlank()) Row(verticalAlignment = Alignment.CenterVertically) {
-                FieldIcon(FieldSymbol.Clock)
-                Spacer(Modifier.width(6.dp))
-                Text("Fecha límite · ${dateLabel(obligation.dueAt)}", style = MaterialTheme.typography.bodySmall, color = FieldMuted)
             }
             PrimaryAction(
                 text = if (obligation.status == "IN_PROGRESS") "Continuar" else "Ver detalle",
@@ -320,6 +380,18 @@ private fun ObligationCard(obligation: AssignedObligation, onClick: () -> Unit) 
                 icon = Icons.Filled.PlayArrow
             )
         }
+    }
+}
+
+@Composable
+private fun ActivityTrack(modifier: Modifier) {
+    Canvas(modifier) {
+        val start = Offset(size.width / 2f, 9.dp.toPx())
+        val end = Offset(start.x, size.height - 5.dp.toPx())
+        drawLine(FieldTeal.copy(alpha = .45f), start, end, strokeWidth = 1.dp.toPx())
+        drawCircle(FieldTeal.copy(alpha = .18f), radius = 6.dp.toPx(), center = start)
+        drawCircle(FieldTeal, radius = 3.dp.toPx(), center = start)
+        drawCircle(FieldTeal, radius = 2.dp.toPx(), center = end)
     }
 }
 
