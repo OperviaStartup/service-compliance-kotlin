@@ -64,9 +64,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.opervia.example.serviceCompliance.R
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldCard
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldIcon
@@ -150,16 +152,20 @@ internal fun FieldTasksContent(
                             unselectedIconColor = FieldMuted, unselectedTextColor = FieldMuted
                         )
                         NavigationBarItem(selected = section == AppSection.HOME, onClick = { section = AppSection.HOME },
-                            icon = { Icon(if (section == AppSection.HOME) Icons.Filled.Home else Icons.Outlined.Home, contentDescription = null) }, label = { Text("Inicio") }, colors = itemColors)
+                            icon = { TaskNavigationIcon(if (section == AppSection.HOME) Icons.Filled.Home else Icons.Outlined.Home) },
+                            label = { TaskNavigationLabel("Inicio") }, colors = itemColors)
                         NavigationBarItem(selected = section == AppSection.WORK, onClick = {
                             section = AppSection.WORK
                             filter = TaskFilter.TODAY
                         },
-                            icon = { Icon(Icons.Outlined.AssignmentTurnedIn, contentDescription = null) }, label = { Text("Trabajo") }, colors = itemColors)
+                            icon = { TaskNavigationIcon(Icons.Outlined.AssignmentTurnedIn) },
+                            label = { TaskNavigationLabel("Trabajo") }, colors = itemColors)
                         NavigationBarItem(selected = section == AppSection.HISTORY, onClick = { section = AppSection.HISTORY },
-                            icon = { Icon(Icons.Outlined.Schedule, contentDescription = null) }, label = { Text("Historial") }, colors = itemColors)
+                            icon = { TaskNavigationIcon(Icons.Outlined.Schedule) },
+                            label = { TaskNavigationLabel("Historial") }, colors = itemColors)
                         NavigationBarItem(selected = section == AppSection.PROFILE, onClick = { section = AppSection.PROFILE },
-                            icon = { Icon(Icons.Outlined.Person, contentDescription = null) }, label = { Text("Perfil") }, colors = itemColors)
+                            icon = { TaskNavigationIcon(Icons.Outlined.Person) },
+                            label = { TaskNavigationLabel("Perfil") }, colors = itemColors)
                     }
                 }
             ) { padding ->
@@ -168,7 +174,7 @@ internal fun FieldTasksContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     if (section in setOf(AppSection.HOME, AppSection.WORK, AppSection.PROFILE)) Row(
-                        Modifier.fillMaxWidth().padding(top = if (section == AppSection.WORK) 24.dp else 0.dp),
+                        Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(Modifier.weight(1f)) {
@@ -182,10 +188,10 @@ internal fun FieldTasksContent(
                             }, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                         }
                         IconButton(onClick = { section = AppSection.SYNC }) {
-                            Icon(Icons.Filled.CloudSync, contentDescription = "Centro de sincronización", tint = FieldBlue)
+                            Icon(Icons.Filled.CloudSync, contentDescription = "Centro de sincronización", tint = FieldBlue, modifier = Modifier.size(28.dp))
                         }
                         IconButton(onClick = onRefresh, enabled = !state.loading) {
-                            Icon(Icons.Filled.Refresh, contentDescription = "Actualizar obligaciones", tint = FieldBlue)
+                            Icon(Icons.Filled.Refresh, contentDescription = "Actualizar obligaciones", tint = FieldBlue, modifier = Modifier.size(28.dp))
                         }
                     }
                     localHistoryWarning?.let { InfoNote(it, warning = true) }
@@ -283,6 +289,16 @@ internal fun FieldTasksContent(
             }
         }
     }
+}
+
+@Composable
+private fun TaskNavigationIcon(icon: ImageVector) {
+    Icon(icon, contentDescription = null, modifier = Modifier.size(32.dp))
+}
+
+@Composable
+private fun TaskNavigationLabel(text: String) {
+    Text(text, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp))
 }
 
 @Composable
