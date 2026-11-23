@@ -7,6 +7,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -105,7 +110,7 @@ fun LoginScreen(
                         onValueChange = onIdentifierChanged,
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = { Text("nombre@empresa.com") },
-                        leadingIcon = { Text("✉", color = OperviaAction, fontSize = 18.sp) },
+                        leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = OperviaAction) },
                         singleLine = true,
                         isError = state.identifierError != null || state.messageIsError,
                         colors = loginFieldColors(state.identifierError != null || state.messageIsError),
@@ -129,10 +134,14 @@ fun LoginScreen(
                         onValueChange = onPasswordChanged,
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = { Text("Ingresa tu contraseña") },
-                        leadingIcon = {Text("▣", color = OperviaAction, fontSize = 18.sp) },
+                        leadingIcon = {Icon(Icons.Outlined.Lock, contentDescription = null, tint = OperviaAction) },
                         trailingIcon = {
-                            TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Text(if (passwordVisible) "◉" else "◎", color = OperviaAction, fontSize = 18.sp)
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    if (passwordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                    contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                                    tint = OperviaAction
+                                )
                             }
                         },
                         singleLine = true,
@@ -169,7 +178,7 @@ fun LoginScreen(
                         enabled = !state.loading,
                         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                         shape = RoundedCornerShape(6.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0878EF))
+                        colors = ButtonDefaults.buttonColors(containerColor = OperviaAction)
                     ) {
                         if (state.loading) {
                             CircularProgressIndicator(
@@ -239,7 +248,7 @@ private fun FieldHeading(label: String, valid: Boolean, showStatus: Boolean) {
         Text(label, color = OperviaInk, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
         if (showStatus) {
             Text(
-                if (valid) "● Válido" else "● Revisa",
+                if (valid) "Válido" else "Revisa",
                 color = if (valid) Color(0xFF00A875) else OperviaDanger,
                 style = MaterialTheme.typography.labelSmall
             )

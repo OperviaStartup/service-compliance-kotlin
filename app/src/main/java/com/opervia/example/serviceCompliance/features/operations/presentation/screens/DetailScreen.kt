@@ -3,11 +3,17 @@ package com.opervia.example.serviceCompliance.features.operations.presentation.s
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldCard
@@ -36,6 +42,7 @@ internal fun DetailScreen(
                 else -> "Iniciar actividad"
             },
             onClick = if (state.execution == null) onStart else onContinue,
+            icon = if (state.execution == null) Icons.Filled.PlayArrow else null,
             enabled = !state.busy && !state.sessionExpired &&
                 (state.execution != null || obligation.status !in setOf("SUBMITTED", "COMPLETED"))
         )
@@ -52,7 +59,14 @@ internal fun DetailScreen(
                 FieldIcon(FieldSymbol.Document)
                 Text("Instrucciones de la actividad", style = MaterialTheme.typography.titleMedium)
             }
-            Text(obligation.description, style = MaterialTheme.typography.bodyMedium, color = FieldMuted)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = MaterialTheme.shapes.small
+            ) {
+                Text(obligation.description, modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium, color = FieldMuted)
+            }
         }
         InfoNote("El registro de ejecución indica lo realizado. La evaluación de cumplimiento corresponde a supervisión.")
         if (state.execution != null) InfoNote("Ya registraste un resultado para esta actividad en esta sesión.")
@@ -62,7 +76,7 @@ internal fun DetailScreen(
 @Composable
 internal fun ObligationSummary(obligation: AssignedObligation) {
     FieldCard {
-        StatusPill(statusLabel(obligation.status), positive = obligation.status == "IN_PROGRESS" || obligation.status == "SUBMITTED", warning = obligation.status == "OVERDUE")
+        StatusPill(statusLabel(obligation.status), positive = obligation.status == "SUBMITTED", warning = obligation.status == "OVERDUE")
         Text(obligation.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FieldIcon(FieldSymbol.Building)

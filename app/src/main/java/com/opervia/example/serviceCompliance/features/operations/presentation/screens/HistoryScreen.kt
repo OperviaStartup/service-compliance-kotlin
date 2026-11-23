@@ -100,7 +100,7 @@ internal fun HistoryScreen(
         }
         if (resultFilter != HistoryResult.ALL) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(resultFilter == HistoryResult.COMPLETED, { resultFilter = HistoryResult.COMPLETED }, label = { Text("Conforme") })
+                FilterChip(resultFilter == HistoryResult.COMPLETED, { resultFilter = HistoryResult.COMPLETED }, label = { Text("Completada") })
                 FilterChip(resultFilter == HistoryResult.WITH_OBSERVATION, { resultFilter = HistoryResult.WITH_OBSERVATION }, label = { Text("Con observación") })
             }
         }
@@ -130,7 +130,7 @@ internal fun HistoryScreen(
 
     val record = records.firstOrNull { it.id == selectedRecord }
     if (showFilterSheet) {
-        ModalBottomSheet(onDismissRequest = { showFilterSheet = false }, sheetState = rememberModalBottomSheetState()) {
+        ModalBottomSheet(onDismissRequest = { showFilterSheet = false }, sheetState = rememberModalBottomSheetState(), containerColor = Color.White) {
             Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Filtrar actividades", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 HistoryResult.entries.forEach { option ->
@@ -138,16 +138,24 @@ internal fun HistoryScreen(
                         RadioButton(selected = resultFilter == option, onClick = { resultFilter = option })
                         Text(when (option) {
                             HistoryResult.ALL -> "Todas"
-                            HistoryResult.COMPLETED -> "Conforme"
+                            HistoryResult.COMPLETED -> "Completada"
                             HistoryResult.WITH_OBSERVATION -> "Con observación"
                         })
                     }
                 }
-                TextButton(onClick = {
-                    resultFilter = HistoryResult.ALL
-                    showFilterSheet = false
-                }) { Text("Limpiar filtros") }
-                TextButton(onClick = { showFilterSheet = false }) { Text("Aplicar filtros") }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            resultFilter = HistoryResult.ALL
+                            showFilterSheet = false
+                        }
+                    ) { Text("Limpiar filtros") }
+                    androidx.compose.material3.Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = { showFilterSheet = false }
+                    ) { Text("Aplicar filtros") }
+                }
             }
         }
     }
@@ -189,7 +197,7 @@ private fun HistoryRecordCard(record: ExecutionRecord, title: String, onClick: (
 }
 
 private fun ExecutionResult.label(): String = when (this) {
-    ExecutionResult.COMPLETED -> "Conforme"
+    ExecutionResult.COMPLETED -> "Completada"
     ExecutionResult.PARTIAL -> "Parcial"
     ExecutionResult.BLOCKED -> "Con observación"
 }
