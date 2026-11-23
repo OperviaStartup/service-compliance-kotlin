@@ -41,9 +41,9 @@ fun FieldOperationsFlow(model: FieldViewModel, onExit: () -> Unit, onExecutionRe
     }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.refresh() }
     FieldTheme {
-        FieldBackdrop {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Scaffold(
-                modifier = Modifier.widthIn(max = 600.dp).fillMaxSize().align(Alignment.Center),
+                modifier = Modifier.widthIn(max = 600.dp).fillMaxSize(),
                 containerColor = Color.Transparent
             ) { padding ->
                 Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {

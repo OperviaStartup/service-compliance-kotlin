@@ -1,4 +1,4 @@
-package com.opervia.example.serviceCompliance.features.operations.presentation.components
+package com.opervia.example.serviceCompliance.ui.theme
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 
 @Composable
-internal fun FieldBackdrop(content: @Composable BoxScope.() -> Unit) {
+internal fun OperviaBackdrop(content: @Composable BoxScope.() -> Unit) {
     Box(Modifier.fillMaxSize().drawBehind {
         drawRect(Brush.verticalGradient(listOf(Color(0xFFDDF3FF), Color(0xFFF4FAFE), Color(0xFFF5FCFC))))
         val top = Path().apply {

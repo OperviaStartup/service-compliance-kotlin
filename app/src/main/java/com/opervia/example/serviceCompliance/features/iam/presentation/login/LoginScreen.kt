@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opervia.example.serviceCompliance.R
 import com.opervia.example.serviceCompliance.ui.theme.OperviaAction
+import com.opervia.example.serviceCompliance.ui.theme.OperviaBackdrop
 import com.opervia.example.serviceCompliance.ui.theme.OperviaDanger
 import com.opervia.example.serviceCompliance.ui.theme.OperviaInk
 import com.opervia.example.serviceCompliance.ui.theme.OperviaMuted
@@ -39,13 +40,6 @@ fun LoginScreen(
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(R.drawable.login_background),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-
         Column(
             modifier = Modifier
                 .widthIn(max = 520.dp)
@@ -257,12 +251,14 @@ private fun FieldHeading(label: String, valid: Boolean, showStatus: Boolean) {
 @Composable
 private fun LoginPreview() {
     ServiceComplianceKotlinTheme(dynamicColor = false) {
-        LoginScreen(
-            state = LoginUiState(),
-            onIdentifierChanged = {},
-            onPasswordChanged = {},
-            onLogin = {},
-            onForgotPassword = {}
-        )
+        OperviaBackdrop {
+            LoginScreen(
+                state = LoginUiState(),
+                onIdentifierChanged = {},
+                onPasswordChanged = {},
+                onLogin = {},
+                onForgotPassword = {}
+            )
+        }
     }
 }

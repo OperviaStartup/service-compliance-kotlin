@@ -2,6 +2,7 @@ package com.opervia.example.serviceCompliance.features.operations.presentation.s
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,7 +51,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldBackdrop
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldCard
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldIcon
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldSymbol
@@ -100,9 +100,9 @@ internal fun FieldTasksScreen(
     }
 
     FieldTheme {
-        FieldBackdrop {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Scaffold(
-                modifier = Modifier.widthIn(max = 600.dp).fillMaxSize().align(Alignment.Center),
+                modifier = Modifier.widthIn(max = 600.dp).fillMaxSize(),
                 containerColor = Color.Transparent,
                 bottomBar = {
                     NavigationBar(containerColor = Color.White.copy(alpha = .96f)) {
