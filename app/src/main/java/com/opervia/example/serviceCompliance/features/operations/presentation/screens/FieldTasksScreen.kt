@@ -1,26 +1,37 @@
 package com.opervia.example.serviceCompliance.features.operations.presentation.screens
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.AssignmentTurnedIn
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material3.Button
@@ -28,15 +39,19 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
@@ -47,12 +62,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldBackdrop
+import androidx.compose.ui.unit.sp
+import com.opervia.example.serviceCompliance.R
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldCard
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldIcon
+import com.opervia.example.serviceCompliance.features.operations.presentation.components.IconTile
+import com.opervia.example.serviceCompliance.features.operations.presentation.components.PrimaryAction
+import com.opervia.example.serviceCompliance.features.operations.presentation.viewmodel.FieldTasksState
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldSymbol
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.InfoNote
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.StatusPill
@@ -61,6 +83,7 @@ import com.opervia.example.serviceCompliance.features.operations.domain.model.Ex
 import com.opervia.example.serviceCompliance.features.operations.domain.model.ExecutionResult
 import com.opervia.example.serviceCompliance.features.operations.presentation.theme.FieldBlue
 import com.opervia.example.serviceCompliance.features.operations.presentation.theme.FieldMuted
+import com.opervia.example.serviceCompliance.features.operations.presentation.theme.FieldPaleBlue
 import com.opervia.example.serviceCompliance.features.operations.presentation.theme.FieldTeal
 import com.opervia.example.serviceCompliance.features.operations.presentation.theme.FieldTheme
 import com.opervia.example.serviceCompliance.features.operations.presentation.viewmodel.FieldTasksViewModel
@@ -82,16 +105,35 @@ internal fun FieldTasksScreen(
     localHistoryWarning: String?,
     onOpenObligation: (Long) -> Unit,
     onLogout: () -> Unit,
-    onSynchronize: (List<ExecutionRecord>) -> Unit
+    onSynchronize: (List<ExecutionRecord>) -> Unit,
+    historyContent: @Composable () -> Unit
 ) {
     val state by model.state.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.refresh() }
+    FieldTasksContent(
+        state, fullName, executionHistory, localHistoryWarning, onOpenObligation, onLogout,
+        onSynchronize, model::refresh, historyContent
+    )
+}
+
+@Composable
+internal fun FieldTasksContent(
+    state: FieldTasksState,
+    fullName: String,
+    executionHistory: List<ExecutionRecord>,
+    localHistoryWarning: String?,
+    onOpenObligation: (Long) -> Unit,
+    onLogout: () -> Unit,
+    onSynchronize: (List<ExecutionRecord>) -> Unit,
+    onRefresh: () -> Unit,
+    historyContent: @Composable () -> Unit
+) {
     var filter by rememberSaveable { mutableStateOf(TaskFilter.TODAY) }
     var section by rememberSaveable { mutableStateOf(AppSection.HOME) }
     val locallyCompletedIds = executionHistory.filter { it.result == ExecutionResult.COMPLETED }.map { it.obligationId }.toSet()
     val completed = state.obligations.filter { it.status in completedStatuses || it.id in locallyCompletedIds }
     val pending = state.obligations.filter { it.status !in completedStatuses && it.id !in locallyCompletedIds }
-    val shown = when (filter) {
+    val shown = when (if (section == AppSection.HOME) TaskFilter.TODAY else filter) {
         TaskFilter.TODAY -> state.obligations.filter {
             it.id !in locallyCompletedIds && (it.status == "IN_PROGRESS" || isDueToday(it.dueAt))
         }
@@ -100,23 +142,32 @@ internal fun FieldTasksScreen(
     }
 
     FieldTheme {
-        FieldBackdrop {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Scaffold(
-                modifier = Modifier.widthIn(max = 600.dp).fillMaxSize().align(Alignment.Center),
+                modifier = Modifier.widthIn(max = 600.dp).fillMaxSize(),
                 containerColor = Color.Transparent,
                 bottomBar = {
-                    NavigationBar(containerColor = Color.White.copy(alpha = .96f)) {
+                    NavigationBar(containerColor = Color.White) {
+                        val itemColors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = FieldBlue, selectedTextColor = FieldBlue,
+                            indicatorColor = Color.Transparent,
+                            unselectedIconColor = FieldMuted, unselectedTextColor = FieldMuted
+                        )
                         NavigationBarItem(selected = section == AppSection.HOME, onClick = { section = AppSection.HOME },
-                            icon = { Icon(Icons.Filled.Home, contentDescription = null) }, label = { Text("Inicio") })
+                            icon = { TaskNavigationIcon(if (section == AppSection.HOME) Icons.Filled.Home else Icons.Outlined.Home) },
+                            label = { TaskNavigationLabel("Inicio") }, colors = itemColors)
                         NavigationBarItem(selected = section == AppSection.WORK, onClick = {
                             section = AppSection.WORK
-                            filter = TaskFilter.PENDING
+                            filter = TaskFilter.TODAY
                         },
-                            icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null) }, label = { Text("Trabajo") })
+                            icon = { TaskNavigationIcon(Icons.Outlined.AssignmentTurnedIn) },
+                            label = { TaskNavigationLabel("Trabajo") }, colors = itemColors)
                         NavigationBarItem(selected = section == AppSection.HISTORY, onClick = { section = AppSection.HISTORY },
-                            icon = { Icon(Icons.Filled.History, contentDescription = null) }, label = { Text("Historial") })
+                            icon = { TaskNavigationIcon(Icons.Outlined.Schedule) },
+                            label = { TaskNavigationLabel("Historial") }, colors = itemColors)
                         NavigationBarItem(selected = section == AppSection.PROFILE, onClick = { section = AppSection.PROFILE },
-                            icon = { Icon(Icons.Filled.Person, contentDescription = null) }, label = { Text("Perfil") })
+                            icon = { TaskNavigationIcon(Icons.Outlined.Person) },
+                            label = { TaskNavigationLabel("Perfil") }, colors = itemColors)
                     }
                 }
             ) { padding ->
@@ -124,46 +175,41 @@ internal fun FieldTasksScreen(
                     Modifier.fillMaxSize().padding(padding).padding(horizontal = 18.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    if (section in setOf(AppSection.HOME, AppSection.WORK, AppSection.PROFILE)) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    if (section in setOf(AppSection.HOME, AppSection.WORK, AppSection.PROFILE)) Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Column(Modifier.weight(1f)) {
                             Text(LocalDate.now(ZoneId.of("America/Lima")).format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.forLanguageTag("es-PE"))).uppercase(),
                                 style = MaterialTheme.typography.labelSmall, color = FieldMuted)
                             Text(when (section) {
-                                AppSection.HOME -> "Inicio"
+                                AppSection.HOME -> "Buenos días, ${fullName.substringBefore(' ').ifBlank { "Operario" }}"
                                 AppSection.WORK -> "Trabajo"
                                 AppSection.PROFILE -> "Perfil"
                                 else -> ""
                             }, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                            Text("Buenos días, ${fullName.substringBefore(' ').ifBlank { "Operario" }}", style = MaterialTheme.typography.bodyMedium, color = FieldMuted)
                         }
                         IconButton(onClick = { section = AppSection.SYNC }) {
-                            Icon(Icons.Filled.CloudSync, contentDescription = "Centro de sincronización", tint = FieldBlue)
+                            Icon(Icons.Filled.CloudSync, contentDescription = "Centro de sincronización", tint = FieldBlue, modifier = Modifier.size(28.dp))
                         }
-                        IconButton(onClick = model::refresh, enabled = !state.loading) {
-                            Icon(Icons.Filled.Refresh, contentDescription = "Actualizar obligaciones", tint = FieldBlue)
-                        }
-                        IconButton(onClick = onLogout) {
-                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión", tint = FieldMuted)
+                        IconButton(onClick = onRefresh, enabled = !state.loading) {
+                            Icon(Icons.Filled.Refresh, contentDescription = "Actualizar obligaciones", tint = FieldBlue, modifier = Modifier.size(28.dp))
                         }
                     }
                     localHistoryWarning?.let { InfoNote(it, warning = true) }
                     if (state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                     state.cacheError?.let { InfoNote(it, warning = true) }
-                    if (state.error != null) {
-                        InfoNote(
-                            if (state.showingStaleData) "No se pudo actualizar. Se muestra la última lista guardada en este dispositivo."
-                            else state.error.orEmpty(),
-                            warning = true
-                        )
-                        if (!state.sessionExpired) Button(onClick = model::refresh, modifier = Modifier.fillMaxWidth()) {
+                    if (state.error != null && !state.showingStaleData) {
+                        InfoNote(state.error.orEmpty(), warning = true)
+                        if (!state.sessionExpired) Button(onClick = onRefresh, modifier = Modifier.fillMaxWidth()) {
                             Icon(Icons.Filled.Refresh, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
                             Text("Reintentar")
                         }
                     }
                     if (section == AppSection.HISTORY) {
-                        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            HistoryScreen(executionHistory, state.obligations)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            historyContent()
                         }
                     } else if (section == AppSection.SYNC) {
                         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -181,16 +227,23 @@ internal fun FieldTasksScreen(
                             }
                         }
                     } else {
-                      Text("${state.obligations.size} actividades asignadas", style = MaterialTheme.typography.bodySmall, color = FieldMuted)
-                      if (section == AppSection.HOME) {
-                      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(filter == TaskFilter.TODAY, { filter = TaskFilter.TODAY }, label = { Text("Hoy") })
-                        FilterChip(filter == TaskFilter.PENDING, { filter = TaskFilter.PENDING }, label = { Text("Pendientes ${pending.size}") })
-                        FilterChip(filter == TaskFilter.COMPLETED, { filter = TaskFilter.COMPLETED }, label = { Text("Completadas ${completed.size}") })
-                      }
-                      }
+                        if (section == AppSection.WORK) {
+                            Text("${state.obligations.size} actividades asignadas", style = MaterialTheme.typography.bodySmall, color = FieldMuted)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                val chipColors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = FieldBlue, selectedLabelColor = Color.White,
+                                    containerColor = Color.White, labelColor = FieldMuted
+                                )
+                                FilterChip(filter == TaskFilter.TODAY, { filter = TaskFilter.TODAY }, label = { Text("Hoy") }, shape = CircleShape, colors = chipColors)
+                                FilterChip(filter == TaskFilter.PENDING, { filter = TaskFilter.PENDING }, label = { Text("Pendientes ${pending.size}") }, shape = CircleShape, colors = chipColors)
+                                FilterChip(filter == TaskFilter.COMPLETED, { filter = TaskFilter.COMPLETED }, label = { Text("Completadas ${completed.size}") }, shape = CircleShape, colors = chipColors)
+                            }
+                        }
                     }
                     if (section in setOf(AppSection.HOME, AppSection.WORK)) Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        if (state.showingStaleData) {
+                            SavedTasksNotice(onRetry = if (state.sessionExpired) null else onRefresh)
+                        }
                         if (!state.loading && state.loaded && shown.isEmpty() &&
                             (filter != TaskFilter.COMPLETED || completed.isEmpty()) && state.error == null) {
                             FieldCard {
@@ -207,8 +260,26 @@ internal fun FieldTasksScreen(
                                 }
                             }
                         }
-                        shown.forEach { obligation ->
+                        val ordered = shown.sortedWith(compareBy<AssignedObligation> { it.status != "IN_PROGRESS" }
+                            .thenBy { it.dueAt })
+                        val featured = ordered.firstOrNull {
+                            it.status == "IN_PROGRESS" || (section == AppSection.HOME && it.status == "ASSIGNED")
+                        }
+                        featured?.let { obligation ->
                             ObligationCard(obligation, onClick = { onOpenObligation(obligation.id) })
+                        }
+                        val remaining = ordered.filter { it.id != featured?.id }
+                        val completedIds = completed.map { it.id }.toSet()
+                        val remainingPending = remaining.filter { it.id !in completedIds }
+                        val remainingCompleted = remaining.filter { it.id in completedIds }
+                        if (remainingPending.isNotEmpty()) {
+                            Text(if (section == AppSection.HOME && featured != null) "Después" else "Pendientes",
+                                style = MaterialTheme.typography.titleLarge)
+                            ActivityList(remainingPending, onOpenObligation)
+                        }
+                        if (remainingCompleted.isNotEmpty()) {
+                            Text("Completadas", style = MaterialTheme.typography.titleLarge)
+                            ActivityList(remainingCompleted, onOpenObligation)
                         }
                         if (!state.loaded && state.loading) {
                             Column(Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -223,33 +294,144 @@ internal fun FieldTasksScreen(
 }
 
 @Composable
+private fun TaskNavigationIcon(icon: ImageVector) {
+    Icon(icon, contentDescription = null, modifier = Modifier.size(32.dp))
+}
+
+@Composable
+private fun TaskNavigationLabel(text: String) {
+    Text(text, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp))
+}
+
+@Composable
+private fun SavedTasksNotice(onRetry: (() -> Unit)?) {
+    Surface(
+        color = Color(0xFFE3EEFF),
+        shape = MaterialTheme.shapes.medium,
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(14.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Surface(color = Color(0xFFD3E4FC), shape = CircleShape) {
+                Icon(
+                    Icons.Outlined.CloudOff, contentDescription = null, tint = FieldBlue,
+                    modifier = Modifier.padding(8.dp).size(20.dp)
+                )
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Lista guardada", style = MaterialTheme.typography.titleMedium)
+                StatusPill("Vista local")
+                Text(
+                    "Mostrando la última lista guardada en este dispositivo.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = FieldMuted
+                )
+            }
+            onRetry?.let {
+                TextButton(onClick = it, modifier = Modifier.align(Alignment.CenterVertically)) {
+                    Text("Reintentar")
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun ObligationCard(obligation: AssignedObligation, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, Color.White),
+        shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Surface(color = Color(0xFFE7F3FF), shape = RoundedCornerShape(10.dp)) {
-                    Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null, tint = FieldBlue, modifier = Modifier.padding(9.dp).size(24.dp))
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ActivityTrack(Modifier.fillMaxHeight().width(12.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    StatusPill(
+                        statusLabel(obligation.status),
+                        positive = obligation.status in completedStatuses,
+                        warning = obligation.status == "OVERDUE"
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Image(
+                            painterResource(R.drawable.field_ic_cleaning),
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(obligation.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                FieldIcon(FieldSymbol.Building, Modifier.size(16.dp), tint = FieldMuted)
+                                Text(obligation.siteName, style = MaterialTheme.typography.bodySmall, color = FieldMuted)
+                            }
+                        }
+                    }
+                    if (obligation.dueAt.isNotBlank()) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            FieldIcon(FieldSymbol.Clock, Modifier.size(20.dp))
+                            Text(
+                                "Fecha límite · ${dateLabel(obligation.dueAt)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = FieldMuted
+                            )
+                        }
+                    }
                 }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    StatusPill(statusLabel(obligation.status), positive = obligation.status == "IN_PROGRESS" || obligation.status in completedStatuses, warning = obligation.status == "OVERDUE")
-                    Text(obligation.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            PrimaryAction(
+                text = if (obligation.status == "IN_PROGRESS") "Continuar" else "Ver detalle",
+                onClick = onClick,
+                icon = Icons.Filled.PlayArrow
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActivityTrack(modifier: Modifier) {
+    Canvas(modifier) {
+        val start = Offset(size.width / 2f, 9.dp.toPx())
+        val end = Offset(start.x, size.height - 5.dp.toPx())
+        drawLine(FieldTeal.copy(alpha = .45f), start, end, strokeWidth = 1.dp.toPx())
+        drawCircle(FieldTeal.copy(alpha = .18f), radius = 6.dp.toPx(), center = start)
+        drawCircle(FieldTeal, radius = 3.dp.toPx(), center = start)
+        drawCircle(FieldTeal, radius = 2.dp.toPx(), center = end)
+    }
+}
+
+@Composable
+private fun ActivityList(obligations: List<AssignedObligation>, onOpen: (Long) -> Unit) {
+    FieldCard {
+        obligations.forEachIndexed { index, obligation ->
+            if (index > 0) androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Row(
+                Modifier.fillMaxWidth().clickable { onOpen(obligation.id) }.padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconTile(FieldSymbol.Clock)
+                Column(Modifier.weight(1f)) {
+                    Text(obligation.title, style = MaterialTheme.typography.titleSmall)
                     Text(obligation.siteName, style = MaterialTheme.typography.bodySmall, color = FieldMuted)
+                    if (obligation.dueAt.isNotBlank()) {
+                        Text(dateLabel(obligation.dueAt), style = MaterialTheme.typography.bodySmall, color = FieldMuted)
+                    }
                 }
-            }
-            if (obligation.description?.isNotBlank() == true) Text(obligation.description, style = MaterialTheme.typography.bodySmall, color = FieldMuted, maxLines = 2)
-            if (obligation.dueAt.isNotBlank()) Row(verticalAlignment = Alignment.CenterVertically) {
-                FieldIcon(FieldSymbol.Clock)
-                Spacer(Modifier.width(6.dp))
-                Text("Fecha límite · ${dateLabel(obligation.dueAt)}", style = MaterialTheme.typography.bodySmall, color = FieldMuted)
-            }
-            Button(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-                Text(if (obligation.status in completedStatuses) "Ver actividad" else "Abrir actividad")
+                Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = FieldMuted)
             }
         }
     }

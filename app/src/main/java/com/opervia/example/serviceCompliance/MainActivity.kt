@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.opervia.example.serviceCompliance.app.AppContainer
 import com.opervia.example.serviceCompliance.app.navigation.AppNavHost
+import com.opervia.example.serviceCompliance.ui.theme.OperviaBackdrop
 import com.opervia.example.serviceCompliance.ui.theme.ServiceComplianceKotlinTheme
 
 class MainActivity : ComponentActivity() {
@@ -17,7 +18,7 @@ class MainActivity : ComponentActivity() {
         val container = AppContainer(applicationContext, BuildConfig.API_BASE_URL)
         setContent {
             ServiceComplianceKotlinTheme(dynamicColor = false) {
-                AppNavHost(container)
+                OperviaBackdrop { AppNavHost(container) }
             }
         }
     }

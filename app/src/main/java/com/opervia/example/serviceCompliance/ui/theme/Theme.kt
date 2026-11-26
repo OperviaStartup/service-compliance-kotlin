@@ -33,7 +33,10 @@ private val LightColorScheme = lightColorScheme(
     onBackground = OperviaInk,
     surface = OperviaSurface,
     onSurface = OperviaInk,
-    outline = OperviaLine,
+    outline = OperviaMuted,
+    outlineVariant = OperviaLine,
+    primaryContainer = OperviaTint,
+    onPrimaryContainer = OperviaInk,
     error = OperviaDanger
 )
 

@@ -15,12 +15,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.opervia.example.serviceCompliance.features.operations.presentation.theme.*
+import com.opervia.example.serviceCompliance.ui.theme.OperviaWarning
+import com.opervia.example.serviceCompliance.ui.theme.OperviaWarningTint
 
 @Composable
 internal fun Page(footer: (@Composable ColumnScope.() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(top = 8.dp, bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp), content = content)
+            verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
         if (footer != null) Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp), content = footer)
     }
@@ -66,8 +68,8 @@ internal fun StatusPill(text: String, positive: Boolean = false, warning: Boolea
 
 @Composable
 internal fun InfoNote(text: String, warning: Boolean = false) {
-    val tint = if (warning) Color(0xFFB07818) else FieldBlue
-    Surface(color = if (warning) Color(0xFFFFF5DE) else Color(0xFFDFF0FF), shape = RoundedCornerShape(10.dp)) {
+    val tint = if (warning) OperviaWarning else FieldBlue
+    Surface(color = if (warning) OperviaWarningTint else Color(0xFFDFF0FF), shape = RoundedCornerShape(10.dp)) {
         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
             FieldIcon(if (warning) FieldSymbol.Warning else FieldSymbol.Info, tint = tint)
             Text(text, style = MaterialTheme.typography.bodySmall, color = FieldNavy, modifier = Modifier.weight(1f))
@@ -76,10 +78,18 @@ internal fun InfoNote(text: String, warning: Boolean = false) {
 }
 
 @Composable
-internal fun PrimaryAction(text: String, onClick: () -> Unit, enabled: Boolean = true) {
+internal fun PrimaryAction(text: String, onClick: () -> Unit, enabled: Boolean = true,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null
+) {
     Button(onClick = onClick, enabled = enabled,
         modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp), shape = RoundedCornerShape(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)) { Text(text) }
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
+        if (icon != null) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(10.dp))
+        }
+        Text(text, style = MaterialTheme.typography.labelLarge)
+    }
 }
 
 @Composable

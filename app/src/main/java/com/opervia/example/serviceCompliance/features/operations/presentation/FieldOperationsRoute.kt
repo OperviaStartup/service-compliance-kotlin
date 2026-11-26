@@ -24,8 +24,8 @@ fun FieldOperationsRoute(
     val factory = remember(repository, localStore, userId, obligationId, existingExecution?.id) {
         FieldViewModelFactory(repository, obligationId, existingExecution, localStore, userId)
     }
-    val model: FieldViewModel = viewModel(key = "field-obligation-$obligationId-${existingExecution?.id ?: 0}", factory = factory)
-    FieldOperationsFlow(model, onExit, onExecutionRegistered)
+    val model: FieldViewModel = viewModel(key = "field-obligation-$userId-$obligationId-${existingExecution?.id ?: 0}", factory = factory)
+    FieldOperationsFlow(model, onExit, onExecutionRegistered, repository, localStore, userId, obligationId)
 }
 
 private class FieldViewModelFactory(

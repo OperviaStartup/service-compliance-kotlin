@@ -22,9 +22,12 @@ import com.opervia.example.serviceCompliance.features.operations.presentation.th
 import com.opervia.example.serviceCompliance.features.operations.presentation.viewmodel.FieldViewModel
 import com.opervia.example.serviceCompliance.features.operations.domain.model.ExecutionRecord
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.*
+import com.opervia.example.serviceCompliance.features.operations.data.LocalFieldOperationsStore
+import com.opervia.example.serviceCompliance.features.operations.domain.repository.OperationsRepository
 
 @Composable
-fun FieldOperationsFlow(model: FieldViewModel, onExit: () -> Unit, onExecutionRegistered: (ExecutionRecord) -> Unit) {
+fun FieldOperationsFlow(model: FieldViewModel, onExit: () -> Unit, onExecutionRegistered: (ExecutionRecord) -> Unit,
+    repository: OperationsRepository, localStore: LocalFieldOperationsStore, userId: Long, obligationId: Long) {
     val state by model.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.execution?.id) { state.execution?.let(onExecutionRegistered) }
     val nav = rememberNavController()
@@ -41,9 +44,9 @@ fun FieldOperationsFlow(model: FieldViewModel, onExit: () -> Unit, onExecutionRe
     }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.refresh() }
     FieldTheme {
-        FieldBackdrop {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Scaffold(
-                modifier = Modifier.widthIn(max = 600.dp).fillMaxSize().align(Alignment.Center),
+                modifier = Modifier.widthIn(max = 600.dp).fillMaxSize(),
                 containerColor = Color.Transparent
             ) { padding ->
                 Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
@@ -68,7 +71,7 @@ fun FieldOperationsFlow(model: FieldViewModel, onExit: () -> Unit, onExecutionRe
                             }
                         }
                     }
-                    FieldNavigation(model, state, nav, onExit, Modifier.weight(1f))
+                    FieldNavigation(model, state, nav, onExit, repository, localStore, userId, obligationId, Modifier.weight(1f))
                 }
             }
         }
