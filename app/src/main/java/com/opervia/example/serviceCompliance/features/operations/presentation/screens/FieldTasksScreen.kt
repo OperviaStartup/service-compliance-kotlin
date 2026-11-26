@@ -7,6 +7,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -147,7 +149,7 @@ internal fun FieldTasksContent(
                 modifier = Modifier.widthIn(max = 600.dp).fillMaxSize(),
                 containerColor = Color.Transparent,
                 bottomBar = {
-                    NavigationBar(containerColor = Color.White) {
+                    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                         val itemColors = NavigationBarItemDefaults.colors(
                             selectedIconColor = FieldBlue, selectedTextColor = FieldBlue,
                             indicatorColor = Color.Transparent,
@@ -172,7 +174,11 @@ internal fun FieldTasksContent(
                 }
             ) { padding ->
                 Column(
-                    Modifier.fillMaxSize().padding(padding).padding(horizontal = 18.dp),
+                    Modifier.fillMaxSize()
+                        .padding(padding)
+                        .consumeWindowInsets(padding)
+                        .imePadding()
+                        .padding(horizontal = 18.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     if (section in setOf(AppSection.HOME, AppSection.WORK, AppSection.PROFILE)) Row(

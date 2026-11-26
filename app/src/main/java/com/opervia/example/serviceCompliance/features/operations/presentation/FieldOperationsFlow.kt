@@ -49,7 +49,13 @@ fun FieldOperationsFlow(model: FieldViewModel, onExit: () -> Unit, onExecutionRe
                 modifier = Modifier.widthIn(max = 600.dp).fillMaxSize(),
                 containerColor = Color.Transparent
             ) { padding ->
-                Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
+                Column(
+                    Modifier.fillMaxSize()
+                        .padding(padding)
+                        .consumeWindowInsets(padding)
+                        .imePadding()
+                        .padding(horizontal = 16.dp)
+                ) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { if (!nav.popBackStack()) onExit() }, modifier = Modifier.semantics { contentDescription = "Volver" }) {
                             FieldIcon(FieldSymbol.Back, tint = MaterialTheme.colorScheme.onSurface)
@@ -64,7 +70,7 @@ fun FieldOperationsFlow(model: FieldViewModel, onExit: () -> Unit, onExecutionRe
                     }
                     if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                     state.error?.let { error ->
-                        Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEDEA))) {
+                        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                             Column(Modifier.padding(14.dp)) {
                                 Text(error, color = MaterialTheme.colorScheme.error)
                                 if (state.sessionExpired) TextButton(onClick = onExit) { Text("Regresar") }
