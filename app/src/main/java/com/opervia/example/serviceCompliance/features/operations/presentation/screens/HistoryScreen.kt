@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.opervia.example.serviceCompliance.features.operations.domain.model.HistoryReviewStatus
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.FieldCard
 import com.opervia.example.serviceCompliance.features.operations.presentation.components.InfoNote
+import com.opervia.example.serviceCompliance.features.operations.presentation.theme.FieldBlue
 import com.opervia.example.serviceCompliance.features.operations.presentation.theme.FieldMuted
 import com.opervia.example.serviceCompliance.features.operations.presentation.viewmodel.HistoryPeriod
 import com.opervia.example.serviceCompliance.features.operations.presentation.viewmodel.HistoryState
@@ -55,7 +56,12 @@ internal fun HistoryScreen(
                 Text("Tus ejecuciones registradas", style = MaterialTheme.typography.bodySmall, color = FieldMuted)
             }
             IconButton(onClick = onRefresh, enabled = !state.loading) {
-                Icon(Icons.Filled.Refresh, contentDescription = "Actualizar historial")
+                Icon(
+                    Icons.Filled.Refresh,
+                    contentDescription = "Actualizar historial",
+                    tint = FieldBlue,
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
         OutlinedTextField(value = state.query, onValueChange = onQueryChanged, modifier = Modifier.fillMaxWidth(),
@@ -112,7 +118,11 @@ internal fun HistoryScreen(
         }
     }
     if (showFilterSheet) {
-        ModalBottomSheet(onDismissRequest = { showFilterSheet = false }, sheetState = rememberModalBottomSheetState(), containerColor = Color.White) {
+        ModalBottomSheet(
+            onDismissRequest = { showFilterSheet = false },
+            sheetState = rememberModalBottomSheetState(),
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
             Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Filtrar actividades", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Row(Modifier.fillMaxWidth().selectable(selected = state.reviewStatus == null, role = Role.RadioButton,

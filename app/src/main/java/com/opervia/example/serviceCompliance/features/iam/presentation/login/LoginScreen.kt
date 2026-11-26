@@ -259,7 +259,7 @@ private fun FieldHeading(label: String, valid: Boolean, showStatus: Boolean) {
 @Preview(showBackground = true, widthDp = 393, heightDp = 852)
 @Composable
 private fun LoginPreview() {
-    ServiceComplianceKotlinTheme(dynamicColor = false) {
+    ServiceComplianceKotlinTheme {
         OperviaBackdrop {
             LoginScreen(
                 state = LoginUiState(),
