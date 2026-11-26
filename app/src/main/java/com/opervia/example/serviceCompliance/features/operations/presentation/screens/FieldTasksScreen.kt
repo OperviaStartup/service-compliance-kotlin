@@ -82,7 +82,8 @@ internal fun FieldTasksScreen(
     localHistoryWarning: String?,
     onOpenObligation: (Long) -> Unit,
     onLogout: () -> Unit,
-    onSynchronize: (List<ExecutionRecord>) -> Unit
+    onSynchronize: (List<ExecutionRecord>) -> Unit,
+    historyContent: @Composable () -> Unit
 ) {
     val state by model.state.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.refresh() }
@@ -162,8 +163,8 @@ internal fun FieldTasksScreen(
                         }
                     }
                     if (section == AppSection.HISTORY) {
-                        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            HistoryScreen(executionHistory, state.obligations)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            historyContent()
                         }
                     } else if (section == AppSection.SYNC) {
                         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {

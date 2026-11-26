@@ -31,7 +31,8 @@ fun FieldTasksRoute(
         localHistoryWarning,
         onOpenObligation,
         onLogout,
-        model::synchronize
+        model::synchronize,
+        historyContent = { HistoryRoute(repository, userId, onLogout) }
     )
 }
 

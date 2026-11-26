@@ -79,7 +79,7 @@ internal fun ExceptionScreen(state: FieldState, onReport: (ExecutionResult, Stri
             OutlinedTextField(value = description, onValueChange = { if (it.length <= 1800) description = it },
                 label = { Text("Añadir detalle") }, modifier = Modifier.fillMaxWidth(), minLines = 3,
                 supportingText = { Text("${description.length}/1800 · Obligatorio") })
-            InfoNote("La API no tiene un recurso Exception independiente. Se enviará un resultado BLOCKED con este motivo en las notas.", warning = true)
+            InfoNote("Se enviará el resultado impedido con el motivo y el detalle indicados.", warning = true)
         }
         state.error?.let { InfoNote(it, warning = true) }
         state.localPersistenceWarning?.let { InfoNote(it, warning = true) }

@@ -46,6 +46,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.zxing.embedded)
+    implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -64,6 +66,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("androidx.compose.material:material-icons-extended")
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     // JSONObject real para probar el contrato HTTP en la JVM, sin depender del emulador.
     testImplementation(libs.json)
     androidTestImplementation(platform(libs.androidx.compose.bom))

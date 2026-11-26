@@ -33,6 +33,7 @@ internal fun reasonLabel(reason: String): String {
         "AREA_CLOSED" -> "Área cerrada"
         "MISSING_SUPPLIES" -> "Faltan insumos"
         "SAFETY_RISK" -> "Riesgo de seguridad"
-        else -> "Otro"
+        "OTHER" -> "Otro motivo"
+        else -> "Motivo no disponible"
     }
 }
