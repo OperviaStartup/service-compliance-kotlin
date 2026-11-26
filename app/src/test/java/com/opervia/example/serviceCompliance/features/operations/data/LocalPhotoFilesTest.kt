@@ -19,7 +19,8 @@ class LocalPhotoFilesTest {
         val own = files.file(42, draft)
         assertTrue(own.isFile)
         assertFalse(files.file(43, draft).exists())
-        assertTrue(own.toPath().startsWith(File(temporary.root, "user-42/execution-310").toPath()))
+        val expectedDirectory = File(temporary.root.canonicalFile, "user-42/execution-310")
+        assertEquals(expectedDirectory, own.parentFile)
     }
 
     @Test
