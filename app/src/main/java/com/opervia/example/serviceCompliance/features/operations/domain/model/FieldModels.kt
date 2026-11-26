@@ -26,7 +26,7 @@ enum class EvidenceType { PHOTO, QR_CODE, LOCATION, SIGNATURE }
 
 enum class OperationsFailureKind { INVALID_REQUEST, UNAUTHENTICATED, FORBIDDEN, NOT_FOUND, CONFLICT, SERVER, UNKNOWN }
 
-class OperationsFailure(val kind: OperationsFailureKind, message: String) : Exception(message)
+class OperationsFailure(val kind: OperationsFailureKind, message: String, val code: String? = null) : Exception(message)
 
 data class EvidenceRecord(
     val id: Long,

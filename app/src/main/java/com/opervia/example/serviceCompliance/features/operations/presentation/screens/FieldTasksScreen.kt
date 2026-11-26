@@ -105,13 +105,14 @@ internal fun FieldTasksScreen(
     localHistoryWarning: String?,
     onOpenObligation: (Long) -> Unit,
     onLogout: () -> Unit,
-    onSynchronize: (List<ExecutionRecord>) -> Unit
+    onSynchronize: (List<ExecutionRecord>) -> Unit,
+    historyContent: @Composable () -> Unit
 ) {
     val state by model.state.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.refresh() }
     FieldTasksContent(
         state, fullName, executionHistory, localHistoryWarning, onOpenObligation, onLogout,
-        onSynchronize, model::refresh
+        onSynchronize, model::refresh, historyContent
     )
 }
 
@@ -124,7 +125,8 @@ internal fun FieldTasksContent(
     onOpenObligation: (Long) -> Unit,
     onLogout: () -> Unit,
     onSynchronize: (List<ExecutionRecord>) -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    historyContent: @Composable () -> Unit
 ) {
     var filter by rememberSaveable { mutableStateOf(TaskFilter.TODAY) }
     var section by rememberSaveable { mutableStateOf(AppSection.HOME) }
@@ -206,8 +208,8 @@ internal fun FieldTasksContent(
                         }
                     }
                     if (section == AppSection.HISTORY) {
-                        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            HistoryScreen(executionHistory, state.obligations)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            historyContent()
                         }
                     } else if (section == AppSection.SYNC) {
                         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
